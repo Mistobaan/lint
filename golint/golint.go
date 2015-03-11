@@ -16,10 +16,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/golang/lint"
+	"github.com/Mistobaan/lint"
 )
 
 var minConfidence = flag.Float64("min_confidence", 0.8, "minimum confidence of a problem to print it")
+var errorCount int = 0
 
 func usage() {
 	fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
@@ -56,6 +57,9 @@ func main() {
 	default:
 		lintFiles(flag.Args()...)
 	}
+	if errorCount > 0 {
+		os.Exit(-1)
+	}
 }
 
 func isDir(filename string) bool {
@@ -87,6 +91,7 @@ func lintFiles(filenames ...string) {
 	}
 	for _, p := range ps {
 		if p.Confidence >= *minConfidence {
+			errorCount++
 			fmt.Printf("%v: %s\n", p.Position, p.Text)
 		}
 	}
